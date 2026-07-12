@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block view_title %}Vehicle Registry Master Database{% endblock %}
+
+{% block content %}
+<div class="form-row" style="gap: 30px; align-items: start;">
+    <!-- LEFT PANEL: VEHICLE OWNER FORM -->
+    <div class="workflow-card" style="flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px;">
+        <h3 style="margin-bottom: 20px; color: #f0f6fc;">🚗 Add New Fleet Asset</h3>
+        <form action="/vehicles/create" method="POST">
+            <div class="form-group">
+                <label>Registration Number (Unique Parameter)</label>
+                <input type="text" name="reg_num" required placeholder="e.g. GJ-01-AB-1234">
+            </div>
+            <div class="form-group">
+                <label>Vehicle Model / Model Name</label>
+                <input type="text" name="model" required placeholder="e.g. Van-05">
+            </div>
+            <div class="form-group">
+                <label>Vehicle Fleet Type Descriptor</label>
+                <select name="type" required>
+                    <option value="Light Cargo Van">Light Cargo Van</option>
+                    <option value="Heavy Duty Flatbed">Heavy Duty Flatbed</option>
+                    <option value="Refrigerated Box Truck">Refrigerated Box Truck</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Max Load Capacity (KG)</label>
+                    <input type="number" step="0.01" name="max_capacity" required placeholder="500">
+                </div>
+                <div class="form-group">
+                    <label>Current Odometer Log (KM)</label>
+                    <input type="number" step="0.1" name="odometer" required placeholder="12000">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Asset Acquisition Value (INR)</label>
+                <input type="number" step="1" name="acquisition_cost" required placeholder="450000">
+            </div>
+            <button type="submit" class="btn-primary btn-block">Initialize Asset Entry</button>
+        </form>
+    </div>
+
+    <!-- RIGHT PANEL: FLEET LEDGER DATA TABLE -->
+    <div style="flex: 2; background: var(--bg-card); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px;">
+        <h3 style="margin-bottom: 20px; color: #f0f6fc;">📊 Current Fleet Asset Allocations</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Registration</th>
+                    <th>Model Specs</th>
+                    <th>Type</th>
+                    <th>Max Cap</th>
+                    <th>Odometer</th>
+                    <th>Operational Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles %}
+                <tr>
+                    <td style="font-family: monospace; font-weight: bold; color: #58a6ff;">{{ vehicle.reg_num }}</td>
+                    <td>{{ vehicle.model }}</td>
+                    <td>{{ vehicle.type }}</td>
+                    <td>{{ vehicle.max_capacity }} KG</td>
+                    <td>{{ vehicle.odometer }} KM</td>
+                    <td>
+                        <span class="badge {% if vehicle.status == 'Available' %}badge-success{% elif vehicle.status == 'On Trip' %}badge-info{% else %}badge-warning{% endif %}">
+                            {{ vehicle.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}  
