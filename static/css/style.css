@@ -1,198 +1,227 @@
-/* --- Global Variables for Color Palette and Typography --- */
+/* GLOBAL VARIABLES and Styling  */
 
 :root {
-   
-    --bg-main: #fcf8f2;
-    --bg-card: #ffffff;
-    --sidebar-bg: #f5ebe0;
-    --accent-peach: #ffd3b6;
-    --accent-peach-hover: #ffbf94;
-    --border-beige: #d7c5b4;
-
-   
-    --text-main: #000000;
-    --text-muted: #4a4a4a;
-
-    /* Alert Colors */
-    --alert-success-bg: #d4edda;
-    --alert-success-text: #155724;
-    --alert-error-bg: #f8d7da;
-    --alert-error-text: #721c24;
-    --alert-warning-bg: #fff3cd;
-    --alert-warning-text: #856404;
-
     
-    --shadow-sm: 3px 3px 0 rgba(0, 0, 0, 0.9);
-    --shadow-md: 5px 5px 0 rgba(0, 0, 0, 0.9);
-    --radius-sm: 0px;
-    --radius-md: 0px;
+    --bg-main: #fcf8f2;         
+    --bg-surface: #f4eae1;      
+    --bg-card: #ffffff;         
+    --border-color: #d7c5b4;    
+    
+    
+    --text-main: #000000;
+    --text-muted: #000000; 
+    
+    
+    --accent-peach: #ffd3b6;    
+    --accent-peach-hover: #ffbfa3; 
+    
+    
+    --status-avail: #ccebda;    
+    --status-avail-text: #000000;
+    
+    --status-trip: #d0e1fd;     
+    --status-trip-text: #000000;
+    
+    --status-shop: #fef08a;     
+    --status-shop-text: #000000;
+    
+    --status-crit: #fee2e2;     
+    --status-crit-text: #000000;
 }
 
-/* --- Global Resets --- */
+/* BASE STYLES */
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    color: var(--text-main);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 body {
     background-color: var(--bg-main);
     color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+    font-size: 14px;
     line-height: 1.5;
-    overflow-x: hidden;
 }
 
-/* --- Viewport Layout --- */
+/* HEADERS */
+h1, h2, h3, h4, h5, h6 {
+    color: #000000 !important;
+}
+
 .view-container {
     display: flex;
-    height: 100vh;
     width: 100vw;
-    overflow: hidden;
+    height: 100vh;
 }
 
-/* --- Sidebar Navigation --- */
+/* SIDEBAR */
 .sidebar {
     width: 260px;
-    background-color: var(--sidebar-bg);
-    border-right: 4px solid var(--text-main);
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    flex-shrink: 0;
-    z-index: 10;
+    justify-content: space-between;
 }
 
 .sidebar-brand {
-    padding: 24px 20px;
-    border-bottom: 4px solid var(--text-main);
-    background-color: var(--bg-card);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-brand h2 {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    font-size: 20px;
-    font-weight: 900;
-    letter-spacing: 2px;
+    font-size: 18px;
     color: var(--text-main) !important;
-    text-transform: uppercase;
+    font-weight: 800;
 }
 
 .sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    padding: 15px 10px;
-    gap: 4px;
-    flex-grow: 1;
-    overflow-y: auto;
+    flex: 1;
+    padding-top: 15px;
 }
 
-.menu-item {
-    display: block;
-    padding: 12px 16px;
+/* SIDEBAR MENU ITEMS */
+.sidebar-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
     color: var(--text-main);
     text-decoration: none;
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    font-weight: 600;
     font-size: 14px;
-    border-radius: var(--radius-sm);
+    font-weight: 600;
     border-left: 4px solid transparent;
-    transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    transition: all 0.2s ease;
 }
 
-.menu-item:hover {
+.sidebar-menu .menu-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-menu .menu-item.active {
     background-color: var(--bg-card);
-    border-left-color: var(--border-beige);
-}
-
-.menu-item.active {
-    background-color: var(--accent-peach);
-    color: var(--text-main);
-    border-left-color: var(--text-main);
+    border-left-color: var(--text-main); 
     font-weight: 800;
 }
 
 .user-profile-box {
-    padding: 20px;
-    background-color: var(--bg-card);
-    border-top: 4px solid var(--text-main);
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.03);
 }
 
-/* --- Main Content Area --- */
-.main-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow-y: auto;
-    background-color: var(--bg-main);
-}
-
-.content-header {
-    background-color: var(--bg-card);
-    padding: 20px 30px;
-    border-bottom: 4px solid var(--text-main);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 5;
-}
-
-.content-header h2 {
-    font-size: 26px;
-    font-weight: 700;
-    font-style: italic;
+.user-info p {
+    font-weight: 800;
     color: var(--text-main);
 }
 
-/* --- Flash Notifications & Alert Boxes --- */
-.alert-box {
-    padding: 14px 18px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 24px;
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    border: 3px solid #000000;
-    box-shadow: var(--shadow-sm);
+/* MAIN CONTENT AREA */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-main);
+    overflow-y: auto;
+}
+
+.content-header {
+    height: 70px;
+    min-height: 70px;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background-color: var(--bg-surface);
 }
 
-.alert-box.success {
-    background-color: var(--alert-success-bg);
-    color: var(--alert-success-text);
+.content-header h2 {
+    font-size: 20px;
+    font-weight: 700;
 }
 
-.alert-box.error {
-    background-color: var(--alert-error-bg);
-    color: var(--alert-error-text);
+.system-time-box {
+    font-size: 13px;
+    color: var(--text-main);
+    background-color: var(--bg-card);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--text-main);
+    font-weight: 700;
 }
 
-.alert-box.warning {
-    background-color: var(--alert-warning-bg);
-    color: var(--alert-warning-text);
+.hidden {
+    display: none !important;
 }
 
-/* --- Scrollbar Styling --- */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+/* DATA TABLE BUTTONS */
+.data-table button {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    transition: all 0.2s ease;
 }
 
-::-webkit-scrollbar-track {
-    background: var(--sidebar-bg);
-    border-left: 1px solid var(--border-beige);
+.data-table button:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-::-webkit-scrollbar-thumb {
-    background: var(--text-main);
-    border-radius: 0;
+.data-table td[style*="background: var(--bg-surface)"] {
+    border-left: 2px solid var(--border-color);
+    color: var(--text-main) !important;
+    font-size: 14px;
+}
+/* KPI CARDS */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 30px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #bfaab0;
+.kpi-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 30px 24px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+}
+
+.kpi-card h3 {
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--text-main) !important;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.kpi-card p {
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #4a4a4a;
+    letter-spacing: 0.5px;
+}
+
+.kpi-card.highlight {
+    background-color: var(--accent-peach);
+    border-color: var(--text-main);
+}
+
+.kpi-card.highlight p {
+    color: var(--text-main);
 }
