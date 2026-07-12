@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block view_title %}Reports & Fleet Analytics{% endblock %}
+
+{% block content %}
+<div class="workflow-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="color: var(--text-main); font-weight: 800;">📈 Vehicle Performance Metrics</h3>
+        <!-- Triggers the CSV Export Route -->
+        <a href="/export/csv" class="btn-primary" style="text-decoration: none; display: inline-block;">Download CSV Export</a>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Registration</th>
+                <th>Fuel Efficiency (KM/L)</th>
+                <th>Total Operational Cost (INR)</th>
+                <th>Vehicle ROI (%)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in analytics %}
+            <tr>
+                <td style="font-family: monospace; font-weight: 800;">{{ row.reg_num }}</td>
+                <td style="font-weight: 600;">{{ row.efficiency }} KM/L</td>
+                <td style="font-weight: 600;">₹{{ row.operational_cost }}</td>
+                <td>
+                    <span class="badge {% if row.roi > 0 %}badge-success{% elif row.roi < 0 %}badge-danger{% else %}badge-neutral{% endif %}">
+                        {{ row.roi }}%
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
