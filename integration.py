@@ -73,3 +73,37 @@ def run_dispatch_validation(db_path, vehicle_ref, driver_ref, cargo_weight):
         return False, "Internal validation engine failed to parse operator date signature format."
 
     return True, "All validation checkpoints passed successfully."
+def calculate_vehicle_operational_costs(db_path):
+    """Compute total operational costs (Fuel + Maintenance + Expenses) per vehicle."""
+    conn = get_db_connection(db_path)
+    vehicles = conn.execute("SELECT reg_num, model FROM vehicles").fetchall()
+    
+    summaries = []
+    for v in vehicles:
+        reg = v['reg_num']
+        
+        # Sum Fuel Costs
+        fuel_row = conn.execute("SELECT SUM(cost) as total FROM fuel_logs WHERE vehicle_ref = ?", (reg,)).fetchone()
+        fuel_cost = round(fuel_row['total'] or 0.0, 2)
+        
+        # Sum Maintenance Costs
+        maint_row = conn.execute("SELECT SUM(cost) as total FROM maintenance_logs WHERE vehicle_ref = ?", (reg,)).fetchone()
+        maint_cost = round(maint_row['total'] or 0.0, 2)
+        
+        # Sum General Expenses
+        gen_row = conn.execute("SELECT SUM(cost) as total FROM expenses WHERE vehicle_ref = ?", (reg,)).fetchone()
+        gen_cost = round(gen_row['total'] or 0.0, 2)
+        
+        total_cost = round(fuel_cost + maint_cost + gen_cost, 2)
+        
+        summaries.append({
+            'reg_num': reg,
+            'model': v['model'],
+            'fuel_cost': fuel_cost,
+            'maint_cost': maint_cost,
+            'gen_cost': gen_cost,
+            'total_cost': total_cost
+        })
+        
+    conn.close()
+    return summaries
