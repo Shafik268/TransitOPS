@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block view_title %}Live Operations Dashboard{% endblock %}
+
+{% block content %}
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <h3>{{ kpis.active_vehicles }}</h3>
+        <p>Active Vehicles (On Trip)</p>
+    </div>
+    <div class="kpi-card">
+        <h3>{{ kpis.available_vehicles }}</h3>
+        <p>Available Vehicles</p>
+    </div>
+    <div class="kpi-card">
+        <h3>{{ kpis.maintenance_vehicles }}</h3>
+        <p>Vehicles In Shop</p>
+    </div>
+    <div class="kpi-card">
+        <h3>{{ kpis.active_trips }}</h3>
+        <p>Active Dispatched Trips</p>
+    </div>
+    <div class="kpi-card">
+        <h3>{{ kpis.drivers_duty }}</h3>
+        <p>Drivers On Duty</p>
+    </div>
+    <div class="kpi-card highlight">
+        <h3>{{ kpis.utilization }}%</h3>
+        <p>Total Fleet Utilization</p>
+    </div>
+</div>
+{% endblock %}
