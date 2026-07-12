@@ -4,6 +4,14 @@
 
 {% block content %}
 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+    <style>
+        .badge { padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; display: inline-block; }
+        .badge-ok { background: #d4edda; color: #155724; }
+        .badge-warning { background: #f8d7da; color: #721c24; }
+        .status-pill { padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; display: inline-block; }
+        .status-available { background: #e2f0d9; color: #385723; }
+        .status-other { background: #fff2cc; color: #b25900; }
+    </style>
     
     <!-- LEFT: ADD DRIVER OPERATIVE FORM -->
     <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -49,12 +57,12 @@
     </div>
 
     <!-- RIGHT: DRIVER COMPLIANCE VERIFICATION MATRIX -->
-    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow-x: auto;">
         <h3 style="margin-top: 0; margin-bottom: 20px; color: #000; border-bottom: 2px solid #ffd3b6; padding-bottom: 10px;">
             📋 Driver Compliance Verification Matrix
         </h3>
         
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 600px;">
             <thead>
                 <tr style="background: #fcf8f2; border-bottom: 2px solid #d7c5b4;">
                     <th style="padding: 12px;">ID</th>
@@ -73,12 +81,12 @@
                     <td style="padding: 12px;">{{ d.license_num }} ({{ d.license_cat }})</td>
                     <td style="padding: 12px;">{{ d.expiry_date }}</td>
                     <td style="padding: 12px;">
-                        <span style="padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; {% if d.safety_score >= 80 %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                        <span class="badge {{ 'badge-ok' if d.safety_score >= 80 else 'badge-warning' }}">
                             {{ d.safety_score }}%
                         </span>
                     </td>
                     <td style="padding: 12px;">
-                        <span style="padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; {% if d.status == 'Available' %}background: #e2f0d9; color: #385723;{% else %}background: #fff2cc; color: #b25900;{% endif %}">
+                        <span class="status-pill {{ 'status-available' if d.status == 'Available' else 'status-other' }}">
                             {{ d.status|upper }}
                         </span>
                     </td>

@@ -3,6 +3,7 @@ from flask import current_app, render_template, request, redirect, url_for, flas
 from database.database import get_db_connection
 from integration import (
     run_dispatch_validation,
+    complete_trip_routine,
     calculate_vehicle_operational_costs,
     get_dashboard_kpis,
     get_analytics_data
@@ -17,32 +18,35 @@ def login():
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password'].strip()
+        
+        if not username or not password:
+            flash('Username and password fields cannot be empty.', 'error')
+            return render_template('login.html')
+            
         db_path = current_app.config['DATABASE']
         conn = get_db_connection(db_path)
-        
-        user = conn.execute("SELECT * FROM managers WHERE username = ?", (username,)).fetchone()
-        
-        if user:
-            if user['password'] == password:
-                session['logged_in'] = True
-                session['username'] = username
-                conn.close()
-                return redirect(url_for('dashboard_overview'))
+        try:
+            user = conn.execute("SELECT * FROM managers WHERE username = ?", (username,)).fetchone()
+            if user:
+                if user['password'] == password:
+                    session.permanent = True
+                    session['logged_in'] = True
+                    session['username'] = username
+                    return redirect(url_for('dashboard_overview'))
+                else:
+                    flash('Incorrect password for existing account.', 'error')
             else:
-                flash('Incorrect password for existing account.', 'error')
-        else:
-            try:
                 conn.execute("INSERT INTO managers (username, password) VALUES (?, ?)", (username, password))
                 conn.commit()
+                session.permanent = True
                 session['logged_in'] = True
                 session['username'] = username
                 flash('New account registered and authenticated! Welcome to VelocityOne.', 'success')
-                conn.close()
                 return redirect(url_for('dashboard_overview'))
-            except Exception as e:
-                flash(f'Registration error: {str(e)}', 'error')
-        
-        conn.close()
+        except Exception as e:
+            flash(f'Authentication system error: {str(e)}', 'error')
+        finally:
+            conn.close()
     return render_template('login.html')
 
 @current_app.route('/logout')
@@ -75,11 +79,12 @@ def dashboard_overview():
 def list_vehicles():
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
-    vehicles = conn.execute('SELECT * FROM vehicles').fetchall()
-    conn.close()
-    return render_template('vehicles.html', vehicles=vehicles, active_page='vehicles')
+    try:
+        vehicles = conn.execute('SELECT * FROM vehicles').fetchall()
+        return render_template('vehicles.html', vehicles=vehicles, active_page='vehicles')
+    finally:
+        conn.close()
 
-# Aliases to prevent 404 errors on vehicle submission
 @current_app.route('/vehicles/create', methods=['POST'])
 @current_app.route('/vehicle/create', methods=['POST'])
 @current_app.route('/vehicle/add', methods=['POST'])
@@ -88,11 +93,16 @@ def create_vehicle():
     db_path = current_app.config['DATABASE']
     reg_num = request.form['reg_num'].strip().upper()
     model = request.form['model'].strip()
-    v_type = request.form['type']
-    max_capacity = float(request.form['max_capacity'])
-    odometer = float(request.form['odometer'])
-    acquisition_cost = float(request.form['acquisition_cost'])
+    v_type = request.form['type'].strip()
     
+    try:
+        max_capacity = max(0.0, float(request.form['max_capacity']))
+        odometer = max(0.0, float(request.form['odometer']))
+        acquisition_cost = max(0.0, float(request.form['acquisition_cost']))
+    except ValueError:
+        flash('Invalid numerical values submitted for asset parameters.', 'error')
+        return redirect(url_for('list_vehicles'))
+        
     conn = get_db_connection(db_path)
     try:
         conn.execute(
@@ -103,6 +113,8 @@ def create_vehicle():
         flash('Vehicle asset initialized successfully into VelocityOne registry.', 'success')
     except sqlite3.IntegrityError:
         flash(f'Validation Rejection: Asset Registration Identifier "{reg_num}" matches an existing file inside the registry.', 'error')
+    except Exception as e:
+        flash(f'System error logging vehicle: {str(e)}', 'error')
     finally:
         conn.close()
         
@@ -112,11 +124,12 @@ def create_vehicle():
 def list_drivers():
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
-    drivers = conn.execute('SELECT * FROM drivers').fetchall()
-    conn.close()
-    return render_template('drivers.html', drivers=drivers, active_page='drivers')
+    try:
+        drivers = conn.execute('SELECT * FROM drivers').fetchall()
+        return render_template('drivers.html', drivers=drivers, active_page='drivers')
+    finally:
+        conn.close()
 
-# Aliases to prevent 404 errors on driver submission (Fixes video error at 00:16)
 @current_app.route('/drivers/create', methods=['POST'])
 @current_app.route('/driver/create', methods=['POST'])
 @current_app.route('/driver/add', methods=['POST'])
@@ -128,7 +141,13 @@ def create_driver():
     license_cat = request.form['license_cat'].strip().upper()
     expiry_date = request.form['expiry_date']
     contact = request.form['contact'].strip()
-    safety_score = float(request.form['safety_score'])
+    
+    try:
+        # Strictly clamp safety score between 0.0 and 100.0
+        safety_score = max(0.0, min(100.0, float(request.form['safety_score'])))
+    except ValueError:
+        flash('Safety score must be a valid numerical percentage.', 'error')
+        return redirect(url_for('list_drivers'))
     
     conn = get_db_connection(db_path)
     try:
@@ -140,6 +159,8 @@ def create_driver():
         flash('Driver profile compiled and authenticated within global organizational safety logs.', 'success')
     except sqlite3.IntegrityError:
         flash(f'Validation Rejection: License Identifier Number "{license_num}" already cataloged.', 'error')
+    except Exception as e:
+        flash(f'System error logging driver: {str(e)}', 'error')
     finally:
         conn.close()
         
@@ -153,30 +174,33 @@ def create_driver():
 def dispatch_dashboard():
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
-    
-    vehicles = conn.execute("SELECT * FROM vehicles WHERE status = 'Available'").fetchall()
-    drivers = conn.execute("SELECT * FROM drivers WHERE status = 'Available'").fetchall()
-    conn.close()
-    
-    return render_template('dispatcher.html', vehicles=vehicles, drivers=drivers, active_page='dispatch')
+    try:
+        vehicles = conn.execute("SELECT * FROM vehicles WHERE status = 'Available'").fetchall()
+        drivers = conn.execute("SELECT * FROM drivers WHERE status = 'Available'").fetchall()
+        active_trips = conn.execute("SELECT * FROM trips ORDER BY id DESC").fetchall()
+        return render_template('dispatcher.html', vehicles=vehicles, drivers=drivers, trips=active_trips, active_page='dispatch')
+    finally:
+        conn.close()
 
-# Aliases to prevent 404 errors on trip dispatch
 @current_app.route('/dispatch/create', methods=['POST'])
 @current_app.route('/dispatch/add', methods=['POST'])
 @current_app.route('/trip/create', methods=['POST'])
 @current_app.route('/trips/create', methods=['POST'])
 def execute_dispatch_transaction():
     db_path = current_app.config['DATABASE']
-    
     source = request.form['source'].strip()
     destination = request.form['destination'].strip()
     vehicle_ref = request.form['vehicle_ref'].strip()
-    driver_ref = int(request.form['driver_ref'])
-    cargo_weight = float(request.form['cargo_weight'])
-    planned_distance = float(request.form['planned_distance'])
+    
+    try:
+        driver_ref = int(request.form['driver_ref'])
+        cargo_weight = max(0.0, float(request.form['cargo_weight']))
+        planned_distance = max(0.1, float(request.form['planned_distance']))
+    except ValueError:
+        flash('Invalid numerical parameters submitted for cargo or distance.', 'error')
+        return redirect(url_for('dispatch_dashboard'))
     
     is_valid, message = run_dispatch_validation(db_path, vehicle_ref, driver_ref, cargo_weight)
-    
     if not is_valid:
         flash(f'Deployment Denied: {message}', 'error')
         return redirect(url_for('dispatch_dashboard'))
@@ -200,6 +224,17 @@ def execute_dispatch_transaction():
         
     return redirect(url_for('dispatch_dashboard'))
 
+@current_app.route('/dispatch/complete/<int:trip_id>', methods=['POST', 'GET'])
+def complete_trip_endpoint(trip_id):
+    """Triggers the trip closing routine, restoring assets and boosting odometers."""
+    db_path = current_app.config['DATABASE']
+    success, message = complete_trip_routine(db_path, trip_id)
+    if success:
+        flash(message, 'success')
+    else:
+        flash(f'Could not complete trip: {message}', 'error')
+    return redirect(url_for('dispatch_dashboard'))
+
 # ==========================================
 # PHASE 4: MAINTENANCE ROUTING ENDPOINTS
 # ==========================================
@@ -208,12 +243,13 @@ def execute_dispatch_transaction():
 def maintenance_dashboard():
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
-    vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
-    logs = conn.execute("SELECT * FROM maintenance_logs ORDER BY id DESC").fetchall()
-    conn.close()
-    return render_template('maintenance.html', vehicles=vehicles, logs=logs, active_page='maintenance')
+    try:
+        vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
+        logs = conn.execute("SELECT * FROM maintenance_logs ORDER BY id DESC").fetchall()
+        return render_template('maintenance.html', vehicles=vehicles, logs=logs, active_page='maintenance')
+    finally:
+        conn.close()
 
-# Aliases to prevent 404 errors on maintenance log submission
 @current_app.route('/maintenance/create', methods=['POST'])
 @current_app.route('/maintenance/add', methods=['POST'])
 @current_app.route('/log/create', methods=['POST'])
@@ -221,9 +257,14 @@ def create_maintenance_log():
     db_path = current_app.config['DATABASE']
     vehicle_ref = request.form['vehicle_ref'].strip()
     title = request.form['title'].strip()
-    cost = float(request.form['cost'])
     log_date = request.form['log_date']
     notes = request.form.get('notes', '').strip() if 'notes' in request.form else ''
+    
+    try:
+        cost = max(0.0, float(request.form['cost']))
+    except ValueError:
+        flash('Maintenance cost must be a valid non-negative number.', 'error')
+        return redirect(url_for('maintenance_dashboard'))
     
     conn = get_db_connection(db_path)
     try:
@@ -246,19 +287,21 @@ def create_maintenance_log():
 @current_app.route('/maintenance/close/<int:log_id>', methods=['POST', 'GET'])
 def close_maintenance_log(log_id):
     db_path = current_app.config['DATABASE']
-    vehicle_ref = request.form.get('vehicle_ref')
-    
     conn = get_db_connection(db_path)
     try:
         conn.execute('BEGIN TRANSACTION')
-        if not vehicle_ref:
-            log_entry = conn.execute("SELECT vehicle_ref FROM maintenance_logs WHERE id = ?", (log_id,)).fetchone()
-            if log_entry:
-                vehicle_ref = log_entry['vehicle_ref']
-                
+        log_entry = conn.execute("SELECT vehicle_ref, status FROM maintenance_logs WHERE id = ?", (log_id,)).fetchone()
+        if not log_entry:
+            flash('Error: Maintenance record does not exist.', 'error')
+            return redirect(url_for('maintenance_dashboard'))
+            
+        if log_entry['status'] == 'Closed':
+            flash('This maintenance log has already been closed.', 'warning')
+            return redirect(url_for('maintenance_dashboard'))
+            
+        vehicle_ref = log_entry['vehicle_ref']
         conn.execute("UPDATE maintenance_logs SET status = 'Closed' WHERE id = ?", (log_id,))
-        if vehicle_ref:
-            conn.execute("UPDATE vehicles SET status = 'Available' WHERE reg_num = ?", (vehicle_ref,))
+        conn.execute("UPDATE vehicles SET status = 'Available' WHERE reg_num = ?", (vehicle_ref,))
         conn.commit()
         flash(f'Maintenance closed for {vehicle_ref}. Vehicle restored to Available status.', 'success')
     except Exception as e:
@@ -277,13 +320,13 @@ def close_maintenance_log(log_id):
 def expenses_dashboard():
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
-    vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
-    conn.close()
-    
-    summaries = calculate_vehicle_operational_costs(db_path)
-    return render_template('expenses.html', vehicles=vehicles, summaries=summaries, active_page='expenses')
+    try:
+        vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
+        summaries = calculate_vehicle_operational_costs(db_path)
+        return render_template('expenses.html', vehicles=vehicles, summaries=summaries, active_page='expenses')
+    finally:
+        conn.close()
 
-# Aliases to prevent 404 errors on fuel intake submission (Fixes video error at 01:10)
 @current_app.route('/expenses/fuel/create', methods=['POST'])
 @current_app.route('/fuel/create', methods=['POST'])
 @current_app.route('/fuel/add', methods=['POST'])
@@ -291,21 +334,30 @@ def expenses_dashboard():
 def create_fuel_log():
     db_path = current_app.config['DATABASE']
     vehicle_ref = request.form['vehicle_ref'].strip()
-    liters = float(request.form['liters'])
-    cost = float(request.form['cost'])
     log_date = request.form['log_date']
     
+    try:
+        liters = max(0.1, float(request.form['liters']))
+        cost = max(0.0, float(request.form['cost']))
+    except ValueError:
+        flash('Liters and cost must be valid numerical inputs.', 'error')
+        return redirect(url_for('expenses_dashboard'))
+    
     conn = get_db_connection(db_path)
-    conn.execute(
-        'INSERT INTO fuel_logs (vehicle_ref, liters, cost, log_date) VALUES (?, ?, ?, ?)',
-        (vehicle_ref, liters, cost, log_date)
-    )
-    conn.commit()
-    conn.close()
-    flash(f'Fuel log recorded successfully for {vehicle_ref}.', 'success')
+    try:
+        conn.execute(
+            'INSERT INTO fuel_logs (vehicle_ref, liters, cost, log_date) VALUES (?, ?, ?, ?)',
+            (vehicle_ref, liters, cost, log_date)
+        )
+        conn.commit()
+        flash(f'Fuel log recorded successfully for {vehicle_ref}.', 'success')
+    except Exception as e:
+        flash(f'System error recording fuel: {str(e)}', 'error')
+    finally:
+        conn.close()
+        
     return redirect(url_for('expenses_dashboard'))
 
-# Aliases to prevent 404 errors on general expense submission (Fixes video error at 01:23)
 @current_app.route('/expenses/general/create', methods=['POST'])
 @current_app.route('/expense/create', methods=['POST'])
 @current_app.route('/expense/add', methods=['POST'])
@@ -316,17 +368,27 @@ def create_general_expense():
     db_path = current_app.config['DATABASE']
     vehicle_ref = request.form['vehicle_ref'].strip()
     expense_type = request.form['expense_type']
-    cost = float(request.form['cost'])
     log_date = request.form['log_date']
     
+    try:
+        cost = max(0.0, float(request.form['cost']))
+    except ValueError:
+        flash('Expense cost must be a valid non-negative number.', 'error')
+        return redirect(url_for('expenses_dashboard'))
+    
     conn = get_db_connection(db_path)
-    conn.execute(
-        'INSERT INTO expenses (vehicle_ref, expense_type, cost, log_date) VALUES (?, ?, ?, ?)',
-        (vehicle_ref, expense_type, cost, log_date)
-    )
-    conn.commit()
-    conn.close()
-    flash(f'{expense_type} expense recorded successfully for {vehicle_ref}.', 'success')
+    try:
+        conn.execute(
+            'INSERT INTO expenses (vehicle_ref, expense_type, cost, log_date) VALUES (?, ?, ?, ?)',
+            (vehicle_ref, expense_type, cost, log_date)
+        )
+        conn.commit()
+        flash(f'{expense_type} expense recorded successfully for {vehicle_ref}.', 'success')
+    except Exception as e:
+        flash(f'System error recording expense: {str(e)}', 'error')
+    finally:
+        conn.close()
+        
     return redirect(url_for('expenses_dashboard'))
 
 # ==========================================

@@ -4,6 +4,22 @@
 
 {% block content %}
 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+    <style>
+        .maintenance-status-pill {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .maintenance-status-pill.open {
+            background: #fff2cc;
+            color: #b25900;
+        }
+        .maintenance-status-pill.closed {
+            background: #e2f0d9;
+            color: #385723;
+        }
+    </style>
     
     <!-- LEFT: LOG VEHICLE SERVICE FORM -->
     <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
@@ -50,12 +66,12 @@
     </div>
 
     <!-- RIGHT: MAINTENANCE SERVICE RECORDS TABLE -->
-    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02); overflow-x: auto;">
         <h3 style="margin-top: 0; margin-bottom: 20px; color: #000; border-bottom: 2px solid #ffd3b6; padding-bottom: 10px;">
             📋 Maintenance Service Records
         </h3>
         
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; min-width: 650px;">
             <thead>
                 <tr style="background: #fcf8f2; border-bottom: 2px solid #d7c5b4;">
                     <th style="padding: 12px;">ID</th>
@@ -76,7 +92,7 @@
                     <td style="padding: 12px;">₹{{ log.cost }}</td>
                     <td style="padding: 12px;">{{ log.log_date }}</td>
                     <td style="padding: 12px;">
-                        <span style="padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; {% if log.status == 'Open' %}background: #fff2cc; color: #b25900;{% else %}background: #e2f0d9; color: #385723;{% endif %}">
+                        <span class="maintenance-status-pill {{ 'open' if log.status == 'Open' else 'closed' }}">
                             {{ log.status|upper }}
                         </span>
                     </td>

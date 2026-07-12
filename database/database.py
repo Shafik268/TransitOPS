@@ -2,9 +2,10 @@ import sqlite3
 import os
 
 def get_db_connection(db_path):
-    """Factory creating isolated transactional low-level connection states."""
-    conn = sqlite3.connect(db_path)
+    """Factory creating isolated transactional connections with foreign keys enabled."""
+    conn = sqlite3.connect(db_path, timeout=10.0)
     conn.row_factory = sqlite3.Row
+    conn.execute('PRAGMA foreign_keys = ON;')
     return conn
 
 def init_db(db_path):
@@ -14,7 +15,6 @@ def init_db(db_path):
     conn = get_db_connection(db_path)
     cursor = conn.cursor()
     
-    # 1. Master Vehicle Database Entity
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS vehicles (
             reg_num TEXT PRIMARY KEY,
@@ -27,7 +27,6 @@ def init_db(db_path):
         )
     ''')
     
-    # 2. Master Driver Database Entity
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS drivers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -41,7 +40,6 @@ def init_db(db_path):
         )
     ''')
     
-    # 3. Transactional Trip Lifecycle Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS trips (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,12 +50,11 @@ def init_db(db_path):
             cargo_weight REAL NOT NULL,
             planned_distance REAL NOT NULL,
             status TEXT DEFAULT 'Draft',
-            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num),
-            FOREIGN KEY(driver_ref) REFERENCES drivers(id)
+            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num) ON DELETE CASCADE,
+            FOREIGN KEY(driver_ref) REFERENCES drivers(id) ON DELETE CASCADE
         )
     ''')
 
-    # 4. Maintenance Logs Table [Ref: TransitOps Spec]
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS maintenance_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,11 +64,10 @@ def init_db(db_path):
             log_date TEXT NOT NULL,
             status TEXT DEFAULT 'Open',
             notes TEXT,
-            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num)
+            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num) ON DELETE CASCADE
         )
     ''')
 
-    # 5. Fuel Logs Table [Ref: TransitOps Spec]
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS fuel_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -79,11 +75,10 @@ def init_db(db_path):
             liters REAL NOT NULL,
             cost REAL NOT NULL,
             log_date TEXT NOT NULL,
-            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num)
+            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num) ON DELETE CASCADE
         )
     ''')
 
-    # 6. General Expenses Table [Ref: TransitOps Spec]
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS expenses (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,11 +87,10 @@ def init_db(db_path):
             cost REAL NOT NULL,
             log_date TEXT NOT NULL,
             description TEXT,
-            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num)
+            FOREIGN KEY(vehicle_ref) REFERENCES vehicles(reg_num) ON DELETE CASCADE
         )
     ''')
 
-    # 7. Managers Table (Authentication & Access Control)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS managers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
