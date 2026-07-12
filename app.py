@@ -13,10 +13,6 @@ with app.app_context():
     init_db(app.config['DATABASE'])
     import routes
 
-@app.route('/')
-def dashboard_overview():
-    """Primary layout routing tracking current transactional metrics."""
-    return render_template('base.html', active_page='dashboard')
 
 if __name__ == '__main__':
     # Initialize framework execution loop on default port 5000

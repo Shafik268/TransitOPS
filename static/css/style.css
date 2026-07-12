@@ -1,35 +1,35 @@
-/* GLOBAL RESETS & BASE STYLING */
+/* GLOBAL VARIABLES and Styling  */
 
 :root {
-    /* Main Background Layers */
-    --bg-main: #fcf8f2;         /* Premium Soft Linen White */
-    --bg-surface: #f4eae1;      /* Core Warm Beige Background */
-    --bg-card: #ffffff;         /* Crisp White for Focus Panels and Data Cards */
-    --border-color: #d7c5b4;    /* Subtle Earthy Beige Border Accent */
     
-    /* Text Color Tokens */
+    --bg-main: #fcf8f2;         
+    --bg-surface: #f4eae1;      
+    --bg-card: #ffffff;         
+    --border-color: #d7c5b4;    
+    
+    
     --text-main: #000000;
-    --text-muted: #2d2d2d;
+    --text-muted: #000000; 
     
-    /* Accent Color Tokens */
+    
     --accent-peach: #ffd3b6;    
     --accent-peach-hover: #ffbfa3; 
     
-    /* Status Color Tokens */
-    --status-avail: #ccebda;    
-    --status-avail-text: #0b4622;
     
-    --status-trip: #d0e1fd;   
-    --status-trip-text: #0c316e;
+    --status-avail: #ccebda;    
+    --status-avail-text: #000000;
+    
+    --status-trip: #d0e1fd;     
+    --status-trip-text: #000000;
     
     --status-shop: #fef08a;     
-    --status-shop-text: #713f12;
+    --status-shop-text: #000000;
     
     --status-crit: #fee2e2;     
-    --status-crit-text: #7f1d1d;
+    --status-crit-text: #000000;
 }
 
-/* GLOBAL RESETS & BASE STYLING */
+/* BASE STYLES */
 
 * {
     box-sizing: border-box;
@@ -45,6 +45,11 @@ body {
     overflow: hidden;
     font-size: 14px;
     line-height: 1.5;
+}
+
+/* HEADERS */
+h1, h2, h3, h4, h5, h6 {
+    color: #000000 !important;
 }
 
 .view-container {
@@ -73,8 +78,8 @@ body {
 
 .sidebar-brand h2 {
     font-size: 18px;
-    color: var(--text-main);
-    font-weight: 700;
+    color: var(--text-main) !important;
+    font-weight: 800;
 }
 
 .sidebar-menu {
@@ -88,24 +93,22 @@ body {
     align-items: center;
     gap: 12px;
     padding: 14px 24px;
-    color: var(--text-muted);
+    color: var(--text-main);
     text-decoration: none;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     border-left: 4px solid transparent;
     transition: all 0.2s ease;
 }
 
 .sidebar-menu .menu-item:hover {
-    color: var(--text-main);
-    background-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .sidebar-menu .menu-item.active {
-    color: var(--text-main);
     background-color: var(--bg-card);
-    border-left-color: var(--text-main); /* Direct solid black focus bar */
-    font-weight: 700;
+    border-left-color: var(--text-main); 
+    font-weight: 800;
 }
 
 .user-profile-box {
@@ -115,11 +118,11 @@ body {
 }
 
 .user-info p {
-    font-weight: 700;
+    font-weight: 800;
     color: var(--text-main);
 }
 
-/* MAIN CONTENT CONTAINER */
+/* MAIN CONTENT AREA */
 .main-content {
     flex: 1;
     display: flex;
@@ -141,8 +144,7 @@ body {
 
 .content-header h2 {
     font-size: 20px;
-    color: var(--text-main);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .system-time-box {
@@ -151,106 +153,27 @@ body {
     background-color: var(--bg-card);
     padding: 6px 14px;
     border-radius: 20px;
-    border: 1px solid var(--border-color);
-    font-weight: 500;
+    border: 1px solid var(--text-main);
+    font-weight: 700;
 }
 
-/* HIDDEN UTILITY CLASS */
 .hidden {
     display: none !important;
 }
-/* Styling for the workflow card container */
-.workflow-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 28px;
-    margin-bottom: 25px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
-}
-/* Styling for form groups */
-.form-group {
-    margin-bottom: 20px;
-    flex: 1;
-}
 
-/* Styling for form labels */
-.form-group label {
-    display: block;
-    font-size: 11px;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-    font-weight: 700;
-}
-
-/* Styling for form inputs and selects */
-.form-group input, .form-group select {
-    width: 100%;
-    background-color: var(--bg-main);
-    border: 1px solid var(--border-color);
-    color: var(--text-main);
-    padding: 12px 14px;
-    border-radius: 6px;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Styling for focused form inputs and selects */
-.form-group input:focus, .form-group select:focus {
-    border-color: var(--text-main);
-    background-color: var(--bg-card);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(255, 211, 182, 0.5); 
-}
-
-/* Styling for the primary button */
-.btn-primary {
-    background-color: var(--accent-peach);
-    color: var(--text-main);
-    font-weight: 700;
-    padding: 14px 20px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* DATA TABLE BUTTONS */
+.data-table button {
+    font-family: 'Segoe UI', system-ui, sans-serif;
     transition: all 0.2s ease;
 }
 
-.btn-primary:hover {
-    background-color: var(--accent-peach-hover);
-    border-color: #aa9685;
-    transform: translateY(-1px);
+.data-table button:hover {
+    filter: brightness(0.95);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Styling for block-level buttons */
-.btn-block {
-    width: 100%;
-}
-
-/* Styling for alert boxes */
-.alert-box {
-    padding: 14px 20px;
-    border-radius: 6px;
-    margin-bottom: 20px;
+.data-table td[style*="background: var(--bg-surface)"] {
+    border-left: 2px solid var(--border-color);
+    color: var(--text-main) !important;
     font-size: 14px;
-    line-height: 1.4;
-    border-left: 4px solid;
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-}
-
-.alert-box.error {
-    background-color: var(--status-crit);
-    border-color: var(--status-crit-text);
-    color: var(--status-crit-text);
-}
-
-/* Styling for hidden elements */
-.hidden {
-    display: none !important;
 }
