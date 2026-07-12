@@ -1,53 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VelocityOne | Smart Transport Operations</title>
+    <title>VelocityOne | Fleet Operations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
 </head>
 <body>
     <div class="view-container">
-        <!-- SIDEBAR -->
         <div class="sidebar">
             <div class="sidebar-brand">
-                <h2 style="color: var(--text-main) !important; font-weight: 800;">VelocityOne</h2>
+                <h2 style="color: black; font-weight: 800;">VelocityOne</h2>
             </div>
             <nav class="sidebar-menu">
                 <a href="/" class="menu-item {% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a>
-                <a href="/vehicles" class="menu-item {% if active_page == 'vehicles' %}active{% endif %}">Vehicle Registry</a>
-                <a href="/drivers" class="menu-item {% if active_page == 'drivers' %}active{% endif %}">Drivers & Safety</a>
-                <a href="/dispatch" class="menu-item {% if active_page == 'dispatch' %}active{% endif %}">Trip Dispatcher</a>
-                <a href="/maintenance" class="menu-item {% if active_page == 'maintenance' %}active{% endif %}">Maintenance</a>
-                <a href="/expenses" class="menu-item {% if active_page == 'expenses' %}active{% endif %}">Fuel & Expenses</a>
-                <a href="/analytics" class="menu-item {% if active_page == 'analytics' %}active{% endif %}">Reports & Analytics</a>
+                <a href="/vehicles" class="menu-item">Vehicle Registry</a>
+                <a href="/dispatch" class="menu-item">Trip Dispatcher</a>
+                <a href="/maintenance" class="menu-item">Maintenance</a>
+                <a href="/analytics" class="menu-item">Reports & Analytics</a>
             </nav>
-            <div class="user-profile-box">
-                <div class="user-info">
-                    <p>Debu</p>
-                    <small>FLEET MANAGER</small>
-                </div>
-            </div>
         </div>
-
-        <!-- MAIN VIEWPORT -->
         <div class="main-content">
-            <header class="content-header">
-                <h2>{% block view_title %}{% endblock %}</h2>
-            </header>
-            
-            <main style="padding: 30px;">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                    {% for category, message in messages %}
-                      <div class="alert-box {{ category }}">{{ message }}</div>
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
-                
-                {% block content %}{% endblock %}
-            </main>
+            <header class="content-header"><h2>{% block view_title %}{% endblock %}</h2></header>
+            <main style="padding: 30px;">{% block content %}{% endblock %}</main>
         </div>
     </div>
 </body>
