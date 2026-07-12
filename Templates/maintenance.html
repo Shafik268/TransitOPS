@@ -1,89 +1,106 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block view_title %}Fleet Maintenance & Service Management{% endblock %}
 
 {% block content %}
-<div class="form-row" style="gap: 30px; align-items: start;">
-    <!-- LEFT PANEL: LOG NEW MAINTENANCE -->
-    <div class="workflow-card" style="flex: 1;">
-        <h3 style="margin-bottom: 20px; color: var(--text-main); font-weight: 700;">🔧 Log Vehicle Service</h3>
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+    
+    <!-- LEFT: LOG VEHICLE SERVICE FORM -->
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #000; border-bottom: 2px solid #ffd3b6; padding-bottom: 10px;">
+            🔧 Log Vehicle Service
+        </h3>
+        
         <form action="/maintenance/create" method="POST">
-            <div class="form-group">
-                <label>Select Target Vehicle</label>
-                <select name="vehicle_ref" required>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">SELECT TARGET VEHICLE</label>
+                <select name="vehicle_ref" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; background: white;">
                     <option value="">-- Select Vehicle --</option>
-                    {% for vehicle in vehicles %}
-                        {% if vehicle.status != 'Retired' %}
-                            <option value="{{ vehicle.reg_num }}">{{ vehicle.reg_num }} ({{ vehicle.model }} | Current: {{ vehicle.status }})</option>
-                        {% endif %}
+                    {% for v in vehicles %}
+                    <option value="{{ v.reg_num }}">{{ v.reg_num }} ({{ v.model }} | Current: {{ v.status }})</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group">
-                <label>Service Title / Issue Description</label>
-                <input type="text" name="title" required placeholder="e.g. Engine Oil & Filter Change">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">SERVICE TITLE / ISSUE DESCRIPTION</label>
+                <input type="text" name="title" placeholder="e.g. Engine Oil & Filter Change" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Service Cost (INR)</label>
-                    <input type="number" step="0.01" name="cost" required placeholder="4500.00">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">SERVICE COST (INR)</label>
+                    <input type="number" step="any" min="0" name="cost" placeholder="0.00" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                 </div>
-                <div class="form-group">
-                    <label>Service Date</label>
-                    <input type="date" name="log_date" required>
+                <div>
+                    <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">SERVICE DATE</label>
+                    <input type="date" name="log_date" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
                 </div>
             </div>
-            <div class="form-group">
-                <label>Mechanic / Shop Notes</label>
-                <input type="text" name="notes" placeholder="Optional servicing details...">
+
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">MECHANIC / SHOP NOTES</label>
+                <textarea name="notes" rows="2" placeholder="Optional servicing details..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-family: sans-serif;"></textarea>
             </div>
-            <button type="submit" class="btn-primary btn-block">Submit Maintenance Log (Sets 'In Shop')</button>
+
+            <button type="submit" style="width: 100%; padding: 12px; background: #ffd3b6; border: 1px solid #d7c5b4; border-radius: 4px; font-weight: bold; color: #000; cursor: pointer; font-size: 14px;">
+                SUBMIT MAINTENANCE LOG<br><small style="font-weight: normal;">(SETS 'IN SHOP')</small>
+            </button>
         </form>
     </div>
 
-    <!-- RIGHT PANEL: ACTIVE & HISTORICAL MAINTENANCE LEDGER -->
-    <div class="workflow-card" style="flex: 2;">
-        <h3 style="margin-bottom: 20px; color: var(--text-main); font-weight: 700;">📋 Maintenance Service Records</h3>
-        <table class="data-table">
+    <!-- RIGHT: MAINTENANCE SERVICE RECORDS TABLE -->
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #000; border-bottom: 2px solid #ffd3b6; padding-bottom: 10px;">
+            📋 Maintenance Service Records
+        </h3>
+        
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Vehicle</th>
-                    <th>Service Title</th>
-                    <th>Cost (INR)</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                <tr style="background: #fcf8f2; border-bottom: 2px solid #d7c5b4;">
+                    <th style="padding: 12px;">ID</th>
+                    <th style="padding: 12px;">Vehicle</th>
+                    <th style="padding: 12px;">Service Title</th>
+                    <th style="padding: 12px;">Cost (INR)</th>
+                    <th style="padding: 12px;">Date</th>
+                    <th style="padding: 12px;">Status</th>
+                    <th style="padding: 12px;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 {% for log in logs %}
-                <tr>
-                    <td style="font-weight: 700;">#{{ log.id }}</td>
-                    <td style="font-family: monospace; font-weight: 700; color: var(--text-main);">{{ log.vehicle_ref }}</td>
-                    <td style="font-weight: 600;">{{ log.title }}</td>
-                    <td>₹{{ log.cost }}</td>
-                    <td>{{ log.log_date }}</td>
-                    <td>
-                        <span class="badge {% if log.status == 'Open' %}badge-warning{% else %}badge-success{% endif %}">
-                            {{ log.status }}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px; font-weight: bold;">#{{ log.id }}</td>
+                    <td style="padding: 12px; font-weight: bold;">{{ log.vehicle_ref }}</td>
+                    <td style="padding: 12px;">{{ log.title }}</td>
+                    <td style="padding: 12px;">₹{{ log.cost }}</td>
+                    <td style="padding: 12px;">{{ log.log_date }}</td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; {% if log.status == 'Open' %}background: #fff2cc; color: #b25900;{% else %}background: #e2f0d9; color: #385723;{% endif %}">
+                            {{ log.status|upper }}
                         </span>
                     </td>
-                    <td>
+                    <td style="padding: 12px;">
                         {% if log.status == 'Open' %}
                         <form action="/maintenance/close/{{ log.id }}" method="POST" style="margin: 0;">
                             <input type="hidden" name="vehicle_ref" value="{{ log.vehicle_ref }}">
-                            <button type="submit" style="background: var(--status-avail); color: var(--status-avail-text); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 4px; font-weight: 700; cursor: pointer;">
+                            <button type="submit" style="padding: 6px 12px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; color: #155724; font-weight: bold; cursor: pointer; font-size: 11px;">
                                 ✔ Mark Closed
                             </button>
                         </form>
                         {% else %}
-                        <span style="color: var(--text-muted); font-weight: 600;">Completed</span>
+                        <span style="color: #888; font-size: 11px; font-style: italic;">Completed</span>
                         {% endif %}
                     </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="padding: 20px; text-align: center; color: #888;">No maintenance logs recorded.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
 </div>
-{% endblock %}  
+{% endblock %}

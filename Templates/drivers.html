@@ -1,82 +1,96 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
 {% block view_title %}Driver Registry & Compliance Profile Matrix{% endblock %}
 
 {% block content %}
-<div class="form-row" style="gap: 30px; align-items: start;">
-    <!-- LEFT PANEL: REGISTRATION CAPTURE ENGINE -->
-    <div class="workflow-card" style="flex: 1;">
-        <h3 style="margin-bottom: 20px; color: var(--text-main);">👥 Add Driver Operative</h3>
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; align-items: start;">
+    
+    <!-- LEFT: ADD DRIVER OPERATIVE FORM -->
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #000; border-bottom: 2px solid #ffd3b6; padding-bottom: 10px;">
+            🧑‍✈️ Add Driver Operative
+        </h3>
+        
         <form action="/drivers/create" method="POST">
-            <div class="form-group">
-                <label>Full Operator Name</label>
-                <input type="text" name="name" required placeholder="e.g. Alex Kumar">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">FULL OPERATOR NAME</label>
+                <input type="text" name="name" placeholder="e.g. Alex Kumar" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <div class="form-group">
-                <label>License Authorization Number</label>
-                <input type="text" name="license_num" required placeholder="e.g. DL-GJ01992">
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">LICENSE AUTHORIZATION NUMBER</label>
+                <input type="text" name="license_num" placeholder="e.g. DL-01201992" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <div class="form-group">
-                <label>License Class Category</label>
-                <input type="text" name="license_cat" required placeholder="e.g. LMV / HGV">
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">LICENSE CLASS CATEGORY</label>
+                <input type="text" name="license_cat" placeholder="e.g. LMV / HGV" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <div class="form-group">
-                <label>License Expiration Reference Date</label>
-                <input type="date" name="expiry_date" required>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">LICENSE EXPIRATION REFERENCE DATE</label>
+                <input type="date" name="expiry_date" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <div class="form-group">
-                <label>Emergency Contact Line</label>
-                <input type="text" name="contact" required placeholder="+91-XXXXX-XXXXX">
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">EMERGENCY CONTACT LINE</label>
+                <input type="text" name="contact" placeholder="+91-XXXXX-XXXXX" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <div class="form-group">
-                <label>Current Baseline Safety Score (%)</label>
-                <input type="number" min="0" max="100" name="safety_score" required placeholder="95">
+
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; font-weight: bold; font-size: 12px; margin-bottom: 5px; color: #333;">CURRENT BASELINE SAFETY SCORE (%)</label>
+                <input type="number" step="any" min="0" max="100" name="safety_score" value="95" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;">
             </div>
-            <button type="submit" class="btn-primary btn-block">Log Operator Profile</button>
+
+            <button type="submit" style="width: 100%; padding: 12px; background: #ffd3b6; border: 1px solid #d7c5b4; border-radius: 4px; font-weight: bold; color: #000; cursor: pointer; font-size: 14px;">
+                LOG OPERATOR PROFILE
+            </button>
         </form>
     </div>
 
-    <!-- RIGHT PANEL: COMPLIANCE LEDGER VIEW -->
-    <div class="workflow-card" style="flex: 2;">
-        <h3 style="margin-bottom: 20px; color: var(--text-main);">🔒 Driver Compliance Verification Matrix</h3>
-        <table class="data-table">
+    <!-- RIGHT: DRIVER COMPLIANCE VERIFICATION MATRIX -->
+    <div style="background: white; padding: 25px; border-radius: 8px; border: 1px solid #d7c5b4; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+        <h3 style="margin-top: 0; margin-bottom: 20px; color: #000; border-bottom: 2px solid #ffd3b6; padding-bottom: 10px;">
+            📋 Driver Compliance Verification Matrix
+        </h3>
+        
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Operator Name</th>
-                    <th>License Reference</th>
-                    <th>Expiration</th>
-                    <th>Safety Score</th>
-                    <th>System Access Status</th>
+                <tr style="background: #fcf8f2; border-bottom: 2px solid #d7c5b4;">
+                    <th style="padding: 12px;">ID</th>
+                    <th style="padding: 12px;">Operator Name</th>
+                    <th style="padding: 12px;">License Reference</th>
+                    <th style="padding: 12px;">Expiration</th>
+                    <th style="padding: 12px;">Safety Score</th>
+                    <th style="padding: 12px;">System Access Status</th>
                 </tr>
             </thead>
             <tbody>
-                {% for driver in drivers %}
+                {% for d in drivers %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px; font-weight: bold;">#{{ d.id }}</td>
+                    <td style="padding: 12px;">{{ d.name }}</td>
+                    <td style="padding: 12px;">{{ d.license_num }} ({{ d.license_cat }})</td>
+                    <td style="padding: 12px;">{{ d.expiry_date }}</td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 3px 8px; border-radius: 12px; font-weight: bold; font-size: 11px; {% if d.safety_score >= 80 %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                            {{ d.safety_score }}%
+                        </span>
+                    </td>
+                    <td style="padding: 12px;">
+                        <span style="padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; {% if d.status == 'Available' %}background: #e2f0d9; color: #385723;{% else %}background: #fff2cc; color: #b25900;{% endif %}">
+                            {{ d.status|upper }}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
                 <tr>
-                    <td>{{ driver.id }}</td>
-                    <td style="font-weight: 600; color: var(--text-main);">{{ driver.name }}</td>
-                    <td>
-                        <span style="background: var(--bg-main); padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-family: monospace;">
-                            {{ driver.license_num }} [{{ driver.license_cat }}]
-                        </span>
-                    </td>
-                    <td style="color: var(--text-main);">{{ driver.expiry_date }}</td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-main);">
-                            <div style="flex: 1; background: var(--bg-surface); height: 8px; border-radius: 4px; min-width: 60px; border: 1px solid var(--border-color);">
-                                <div style="background: var(--accent-peach-hover); height: 100%; width: {{ driver.safety_score }}%; border-radius: 4px;"></div>
-                            </div>
-                            <span style="font-weight: 600;">{{ driver.safety_score }}%</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="badge {% if driver.status == 'Available' %}badge-success{% elif driver.status == 'On Trip' %}badge-info{% else %}badge-danger{% endif %}">
-                            {{ driver.status }}
-                        </span>
-                    </td>
+                    <td colspan="6" style="padding: 20px; text-align: center; color: #888;">No operators registered in compliance ledger.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+
 </div>
 {% endblock %}
