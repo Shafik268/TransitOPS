@@ -4,8 +4,8 @@
 {% block content %}
 <div class="form-row" style="gap: 30px; align-items: start;">
     <!-- LEFT PANEL: REGISTRATION CAPTURE ENGINE -->
-    <div class="workflow-card" style="flex: 1; background: var(--bg-card); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px;">
-        <h3 style="margin-bottom: 20px; color: #f0f6fc;">👥 Add Driver Operative</h3>
+    <div class="workflow-card" style="flex: 1;">
+        <h3 style="margin-bottom: 20px; color: var(--text-main);">👥 Add Driver Operative</h3>
         <form action="/drivers/create" method="POST">
             <div class="form-group">
                 <label>Full Operator Name</label>
@@ -36,8 +36,8 @@
     </div>
 
     <!-- RIGHT PANEL: COMPLIANCE LEDGER VIEW -->
-    <div style="flex: 2; background: var(--bg-card); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px;">
-        <h3 style="margin-bottom: 20px; color: #f0f6fc;">🔒 Driver Compliance Verification Matrix</h3>
+    <div class="workflow-card" style="flex: 2;">
+        <h3 style="margin-bottom: 20px; color: var(--text-main);">🔒 Driver Compliance Verification Matrix</h3>
         <table class="data-table">
             <thead>
                 <tr>
@@ -53,15 +53,19 @@
                 {% for driver in drivers %}
                 <tr>
                     <td>{{ driver.id }}</td>
-                    <td style="font-weight: 600;">{{ driver.name }}</td>
-                    <td><span style="background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">{{ driver.license_num }} [{{ driver.license_cat }}]</span></td>
-                    <td>{{ driver.expiry_date }}</td>
+                    <td style="font-weight: 600; color: var(--text-main);">{{ driver.name }}</td>
                     <td>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <div style="flex: 1; background: #30363d; height: 6px; border-radius: 3px; min-width: 60px;">
-                                <div style="background: var(--accent-orange); height: 100%; width: {{ driver.safety_score }}%; border-radius: 3px;"></div>
+                        <span style="background: var(--bg-main); padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-main); font-family: monospace;">
+                            {{ driver.license_num }} [{{ driver.license_cat }}]
+                        </span>
+                    </td>
+                    <td style="color: var(--text-main);">{{ driver.expiry_date }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--text-main);">
+                            <div style="flex: 1; background: var(--bg-surface); height: 8px; border-radius: 4px; min-width: 60px; border: 1px solid var(--border-color);">
+                                <div style="background: var(--accent-peach-hover); height: 100%; width: {{ driver.safety_score }}%; border-radius: 4px;"></div>
                             </div>
-                            <span>{{ driver.safety_score }}%</span>
+                            <span style="font-weight: 600;">{{ driver.safety_score }}%</span>
                         </div>
                     </td>
                     <td>

@@ -159,3 +159,98 @@ body {
 .hidden {
     display: none !important;
 }
+/* Styling for the workflow card container */
+.workflow-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+}
+/* Styling for form groups */
+.form-group {
+    margin-bottom: 20px;
+    flex: 1;
+}
+
+/* Styling for form labels */
+.form-group label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+}
+
+/* Styling for form inputs and selects */
+.form-group input, .form-group select {
+    width: 100%;
+    background-color: var(--bg-main);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Styling for focused form inputs and selects */
+.form-group input:focus, .form-group select:focus {
+    border-color: var(--text-main);
+    background-color: var(--bg-card);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 211, 182, 0.5); 
+}
+
+/* Styling for the primary button */
+.btn-primary {
+    background-color: var(--accent-peach);
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 14px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-peach-hover);
+    border-color: #aa9685;
+    transform: translateY(-1px);
+}
+
+/* Styling for block-level buttons */
+.btn-block {
+    width: 100%;
+}
+
+/* Styling for alert boxes */
+.alert-box {
+    padding: 14px 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+.alert-box.error {
+    background-color: var(--status-crit);
+    border-color: var(--status-crit-text);
+    color: var(--status-crit-text);
+}
+
+/* Styling for hidden elements */
+.hidden {
+    display: none !important;
+}

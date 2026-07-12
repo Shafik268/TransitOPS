@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block view_title %}Live Fleet Operation Dispatcher{% endblock %}
+
+{% block content %}
+
+<div class="workflow-card" style="max-width: 850px; margin: 0 auto;">
+    <h3 style="margin-bottom: 20px; color: var(--text-main); font-weight: 700;">🗺️ Deploy Transport Dispatch Authorization</h3>
+    
+   
+    <div id="dispatch-alert" class="alert-box error hidden"></div>
+
+    <form id="live-dispatch-form" action="/dispatch/create" method="POST">
+      
+        <div class="form-row">
+           
+            <div class="form-group">
+                <label>Select Deployment Vehicle Asset</label>
+               
+                <select name="vehicle_ref" id="dispatch-vehicle-select" required>
+                    <option value="" data-capacity="0">-- Select Available Vehicle --</option>
+                    {% for vehicle in vehicles %}
+                        {% if vehicle.status == 'Available' %}
+                            <option value="{{ vehicle.reg_num }}" data-capacity="{{ vehicle.max_capacity }}">
+                                {{ vehicle.reg_num }} ({{ vehicle.model }} | Cap: {{ vehicle.max_capacity }} KG)
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Assign Certified Operator</label>
+                <select name="driver_ref" id="dispatch-driver-select" required>
+                    <option value="">-- Select Available Driver --</option>
+                    {% for driver in drivers %}
+                        {% if driver.status == 'Available' %}
+                            <option value="{{ driver.id }}">
+                                ID: {{ driver.id }} - {{ driver.name }} (Score: {{ driver.safety_score }}%)
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Source Ingestion Hub</label>
+                
+                <input type="text" name="source" required placeholder="e.g. Origin Warehouse A">
+            </div>
+            <div class="form-group">
+                <label>Target Destination Point</label>
+                <input type="text" name="destination" required placeholder="e.g. Distribution Center B">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Total Cargo Payload Mass (KG)</label>
+                <input type="number" step="0.01" name="cargo_weight" id="dispatch-weight-input" required placeholder="Enter manifest mass">
+            </div>
+            <div class="form-group">
+                <label>Total Route Target Distance (KM)</label>
+                <input type="number" step="0.1" name="planned_distance" required placeholder="Enter navigation range">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-block" style="margin-top: 10px;">Execute Strategic Dispatch Command</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dispatcher.js') }}"></script>
+{% endblock %}  
