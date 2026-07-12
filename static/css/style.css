@@ -100,3 +100,37 @@ body {
     font-weight: 600;
     color: #f0f6fc;
 }
+/* CONTAINER RULES */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-main);
+    overflow-y: auto;
+}
+
+.content-header {
+    height: 70px;
+    min-height: 70px;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-surface);
+}
+
+.content-header h2 {
+    font-size: 20px;
+    color: #f0f6fc;
+    font-weight: 500;
+}
+
+.system-time-box {
+    font-size: 13px;
+    color: var(--text-muted);
+    background-color: var(--bg-main);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
