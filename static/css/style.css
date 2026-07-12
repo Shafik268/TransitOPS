@@ -1,0 +1,102 @@
+/* DESIGN VARIABLES BASELINE MATCHING CORPORATE SYSTEM COMPLIANCE */
+:root {
+    --bg-main: #0d1117;
+    --bg-surface: #161b22;
+    --bg-card: #1f242c;
+    --border-color: #30363d;
+    --text-main: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent-orange: #f26722;
+    --accent-orange-hover: #ff9b50;
+    
+    --status-avail: #238636;
+    --status-trip: #1f6feb;
+    --status-shop: #9e6a03;
+    --status-crit: #da3633;
+}
+
+/* BOX-SIZING RESET LOGIC */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    height: 100vh;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.view-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* CORE SHELL STRUCTURAL ELEMENTS */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sidebar-brand {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-brand h2 {
+    font-size: 18px;
+    color: #f0f6fc;
+    font-weight: 600;
+}
+
+.sidebar-menu {
+    flex: 1;
+    padding-top: 15px;
+}
+
+.sidebar-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.sidebar-menu .menu-item:hover {
+    color: var(--text-main);
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.sidebar-menu .menu-item.active {
+    color: var(--text-main);
+    background-color: var(--bg-card);
+    border-left-color: var(--accent-orange);
+}
+
+.user-profile-box {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border-color);
+    background-color: rgba(0, 0, 0, 0.15);
+}
+
+.user-info p {
+    font-weight: 600;
+    color: #f0f6fc;
+}
