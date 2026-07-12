@@ -1,5 +1,5 @@
 import sqlite3
-from flask import current_app, render_template, request, redirect, url_for, flash, Response
+from flask import current_app, render_template, request, redirect, url_for, flash, Response, session
 from database.database import get_db_connection
 from integration import (
     run_dispatch_validation,
@@ -7,6 +7,61 @@ from integration import (
     get_dashboard_kpis,
     get_analytics_data
 )
+
+# ==========================================
+# GATEKEEPER: AUTO-SIGNUP & LOGIN ENGINE
+# ==========================================
+
+@current_app.route('/login', methods=['GET', 'POST'])
+def login():
+    """Handles authentication. If user does not exist, registers them automatically."""
+    if request.method == 'POST':
+        username = request.form['username'].strip()
+        password = request.form['password'].strip()
+        db_path = current_app.config['DATABASE']
+        conn = get_db_connection(db_path)
+        
+        # Check if manager account already exists
+        user = conn.execute("SELECT * FROM managers WHERE username = ?", (username,)).fetchone()
+        
+        if user:
+            # Existing user login
+            if user['password'] == password:
+                session['logged_in'] = True
+                session['username'] = username
+                conn.close()
+                return redirect(url_for('dashboard_overview'))
+            else:
+                flash('Incorrect password for existing account.', 'error')
+        else:
+            # First-time user auto-registration
+            try:
+                conn.execute("INSERT INTO managers (username, password) VALUES (?, ?)", (username, password))
+                conn.commit()
+                session['logged_in'] = True
+                session['username'] = username
+                flash('New account registered and authenticated! Welcome to VelocityOne.', 'success')
+                conn.close()
+                return redirect(url_for('dashboard_overview'))
+            except Exception as e:
+                flash(f'Registration error: {str(e)}', 'error')
+        
+        conn.close()
+    return render_template('login.html')
+
+@current_app.route('/logout')
+def logout():
+    """Clear session and redirect to login."""
+    session.clear()
+    flash('You have been logged out securely.', 'success')
+    return redirect(url_for('login'))
+
+@current_app.before_request
+def restrict_access():
+    """Ensure unauthenticated users are routed to the login gatekeeper."""
+    allowed_routes = ['login', 'static']
+    if not session.get('logged_in') and request.endpoint not in allowed_routes:
+        return redirect(url_for('login'))
 
 # ==========================================
 # PHASE 5: MAIN DASHBOARD ROUTING
@@ -50,7 +105,7 @@ def create_vehicle():
             (reg_num, model, v_type, max_capacity, odometer, acquisition_cost, 'Available')
         )
         conn.commit()
-        flash('Vehicle asset initialized successfully into centralized network repository.', 'success')
+        flash('Vehicle asset initialized successfully into VelocityOne registry.', 'success')
     except sqlite3.IntegrityError:
         flash(f'Validation Rejection: Asset Registration Identifier "{reg_num}" matches an existing file inside the registry.', 'error')
     finally:
@@ -121,7 +176,7 @@ def execute_dispatch_transaction():
     cargo_weight = float(request.form['cargo_weight'])
     planned_distance = float(request.form['planned_distance'])
     
-    # Delegate logic execution down to Arnob's validation framework middleware
+    # Delegate logic execution down to validation framework middleware
     is_valid, message = run_dispatch_validation(db_path, vehicle_ref, driver_ref, cargo_weight)
     
     if not is_valid:
@@ -174,15 +229,15 @@ def create_maintenance_log():
     title = request.form['title'].strip()
     cost = float(request.form['cost'])
     log_date = request.form['log_date']
-    notes = request.form.get('notes', '').strip()
+    notes = request.form.get('notes', '').strip() if 'notes' in request.form else ''
     
     conn = get_db_connection(db_path)
     try:
         conn.execute('BEGIN TRANSACTION')
         # 1. Insert maintenance record
         conn.execute(
-            'INSERT INTO maintenance_logs (vehicle_ref, title, cost, log_date, status, notes) VALUES (?, ?, ?, ?, ?, ?)',
-            (vehicle_ref, title, cost, log_date, 'Open', notes)
+            'INSERT INTO maintenance_logs (vehicle_ref, title, cost, log_date, status) VALUES (?, ?, ?, ?, ?)',
+            (vehicle_ref, title, cost, log_date, 'Open')
         )
         # 2. Automated Business Rule: Switch vehicle status to 'In Shop'
         conn.execute("UPDATE vehicles SET status = 'In Shop' WHERE reg_num = ?", (vehicle_ref,))
@@ -231,7 +286,7 @@ def expenses_dashboard():
     vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
     conn.close()
     
-    # Calculate automated per-vehicle summaries using Arnob's logic engine
+    # Calculate automated per-vehicle summaries using logic engine
     summaries = calculate_vehicle_operational_costs(db_path)
     return render_template('expenses.html', vehicles=vehicles, summaries=summaries, active_page='expenses')
 
@@ -301,5 +356,5 @@ def export_csv():
     return Response(
         generate_csv(), 
         mimetype='text/csv', 
-        headers={'Content-Disposition': 'attachment; filename=transitops_analytics.csv'}
+        headers={'Content-Disposition': 'attachment; filename=velocityone_analytics.csv'}
     )
