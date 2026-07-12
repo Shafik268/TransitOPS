@@ -137,3 +137,126 @@ def execute_dispatch_transaction():
         conn.close()
         
     return redirect(url_for('dispatch_dashboard'))
+
+from integration import calculate_vehicle_operational_costs
+
+# ==========================================
+# PHASE 4: MAINTENANCE ROUTING ENDPOINTS
+# ==========================================
+
+@current_app.route('/maintenance', methods=['GET'])
+def maintenance_dashboard():
+    """Deliver maintenance service logs and eligible vehicle lists."""
+    db_path = current_app.config['DATABASE']
+    conn = get_db_connection(db_path)
+    vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
+    logs = conn.execute("SELECT * FROM maintenance_logs ORDER BY id DESC").fetchall()
+    conn.close()
+    return render_template('maintenance.html', vehicles=vehicles, logs=logs, active_page='maintenance')
+
+@current_app.route('/maintenance/create', methods=['POST'])
+def create_maintenance_log():
+    """Log service entry and automatically transition vehicle status to 'In Shop'."""
+    db_path = current_app.config['DATABASE']
+    vehicle_ref = request.form['vehicle_ref'].strip()
+    title = request.form['title'].strip()
+    cost = float(request.form['cost'])
+    log_date = request.form['log_date']
+    notes = request.form.get('notes', '').strip()
+    
+    conn = get_db_connection(db_path)
+    try:
+        conn.execute('BEGIN TRANSACTION')
+        # 1. Insert maintenance record
+        conn.execute(
+            'INSERT INTO maintenance_logs (vehicle_ref, title, cost, log_date, status, notes) VALUES (?, ?, ?, ?, ?, ?)',
+            (vehicle_ref, title, cost, log_date, 'Open', notes)
+        )
+        # 2. Automated Business Rule: Switch vehicle status to 'In Shop'
+        conn.execute("UPDATE vehicles SET status = 'In Shop' WHERE reg_num = ?", (vehicle_ref,))
+        conn.commit()
+        flash(f'Service logged for {vehicle_ref}. Vehicle status automatically switched to In Shop.', 'warning')
+    except Exception as e:
+        conn.execute('ROLLBACK')
+        flash(f'Error logging maintenance: {str(e)}', 'error')
+    finally:
+        conn.close()
+        
+    return redirect(url_for('maintenance_dashboard'))
+
+@current_app.route('/maintenance/close/<int:log_id>', methods=['POST'])
+def close_maintenance_log(log_id):
+    """Close maintenance log and restore vehicle status back to 'Available'."""
+    db_path = current_app.config['DATABASE']
+    vehicle_ref = request.form['vehicle_ref'].strip()
+    
+    conn = get_db_connection(db_path)
+    try:
+        conn.execute('BEGIN TRANSACTION')
+        # 1. Mark log as Closed
+        conn.execute("UPDATE maintenance_logs SET status = 'Closed' WHERE id = ?", (log_id,))
+        # 2. Automated Business Rule: Restore vehicle status to 'Available'
+        conn.execute("UPDATE vehicles SET status = 'Available' WHERE reg_num = ?", (vehicle_ref,))
+        conn.commit()
+        flash(f'Maintenance closed for {vehicle_ref}. Vehicle restored to Available status.', 'success')
+    except Exception as e:
+        conn.execute('ROLLBACK')
+        flash(f'Error closing maintenance: {str(e)}', 'error')
+    finally:
+        conn.close()
+        
+    return redirect(url_for('maintenance_dashboard'))
+
+# ==========================================
+# PHASE 4: FUEL & EXPENSES ROUTING ENDPOINTS
+# ==========================================
+
+@current_app.route('/expenses', methods=['GET'])
+def expenses_dashboard():
+    """Deliver fuel/expense ingestion forms and automated cost summary breakdown."""
+    db_path = current_app.config['DATABASE']
+    conn = get_db_connection(db_path)
+    vehicles = conn.execute("SELECT * FROM vehicles").fetchall()
+    conn.close()
+    
+    # Calculate automated per-vehicle summaries using Arnob's logic engine
+    summaries = calculate_vehicle_operational_costs(db_path)
+    return render_template('expenses.html', vehicles=vehicles, summaries=summaries, active_page='expenses')
+
+@current_app.route('/expenses/fuel/create', methods=['POST'])
+def create_fuel_log():
+    """Log refueling transaction."""
+    db_path = current_app.config['DATABASE']
+    vehicle_ref = request.form['vehicle_ref'].strip()
+    liters = float(request.form['liters'])
+    cost = float(request.form['cost'])
+    log_date = request.form['log_date']
+    
+    conn = get_db_connection(db_path)
+    conn.execute(
+        'INSERT INTO fuel_logs (vehicle_ref, liters, cost, log_date) VALUES (?, ?, ?, ?)',
+        (vehicle_ref, liters, cost, log_date)
+    )
+    conn.commit()
+    conn.close()
+    flash(f'Fuel log recorded successfully for {vehicle_ref}.', 'success')
+    return redirect(url_for('expenses_dashboard'))
+
+@current_app.route('/expenses/general/create', methods=['POST'])
+def create_general_expense():
+    """Log general operational overhead expense."""
+    db_path = current_app.config['DATABASE']
+    vehicle_ref = request.form['vehicle_ref'].strip()
+    expense_type = request.form['expense_type']
+    cost = float(request.form['cost'])
+    log_date = request.form['log_date']
+    
+    conn = get_db_connection(db_path)
+    conn.execute(
+        'INSERT INTO expenses (vehicle_ref, expense_type, cost, log_date) VALUES (?, ?, ?, ?)',
+        (vehicle_ref, expense_type, cost, log_date)
+    )
+    conn.commit()
+    conn.close()
+    flash(f'{expense_type} expense recorded successfully for {vehicle_ref}.', 'success')
+    return redirect(url_for('expenses_dashboard'))
