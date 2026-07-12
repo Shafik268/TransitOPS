@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransitOps - Smart Transport Operations Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+</head>
+<body>
+
+    <!-- APPLICATION  INTERFACE  -->
+    <div id="app-shell" class="view-container">
+        <!-- FIXED SIDEBAR MENUS -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">🚚</span>
+                <h2>TransitOps</h2>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="/" class="menu-item {% if active_page == 'dashboard' %}active{% endif %}">📊 Dashboard</a>
+                <a href="/vehicles" class="menu-item {% if active_page == 'vehicles' %}active{% endif %}">🚛 Vehicle Registry</a>
+                <a href="/drivers" class="menu-item {% if active_page == 'drivers' %}active{% endif %}">👥 Drivers & Safety</a>
+                <a href="/dispatch" class="menu-item {% if active_page == 'dispatch' %}active{% endif %}">🗺️ Trip Dispatcher</a>
+                <a href="/maintenance" class="menu-item {% if active_page == 'maintenance' %}active{% endif %}">🔧 Maintenance</a>
+                <a href="/expenses" class="menu-item {% if active_page == 'expenses' %}active{% endif %}">💳 Fuel & Expenses</a>
+                <a href="/analytics" class="menu-item {% if active_page == 'analytics' %}active{% endif %}">📈 Reports & Analytics</a>
+            </nav>
+            <div class="user-profile-box">
+                <div class="user-info">
+                    <p id="user-display-name">Debopriyo Bagchi</p>
+                    <span class="badge badge-neutral">Fleet Manager</span>
+                </div>
+            </div>
+        </aside>
