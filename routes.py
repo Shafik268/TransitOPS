@@ -181,7 +181,7 @@ def export_csv():
             
     # Return standard CSV headers forcing a browser file download
     return Response(
-        generate_csv(), 
+        generate(), 
         mimetype='text/csv', 
         headers={'Content-Disposition': 'attachment; filename=transitops_analytics.csv'}
     )
