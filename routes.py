@@ -1,15 +1,29 @@
-
-from flask import current_app, render_template, request, redirect, url_for, flash
 import sqlite3
+from flask import current_app, render_template, request, redirect, url_for, flash, Response
 from database.database import get_db_connection
+from integration import (
+    run_dispatch_validation,
+    calculate_vehicle_operational_costs,
+    get_dashboard_kpis,
+    get_analytics_data
+)
 
+# ==========================================
+# PHASE 5: MAIN DASHBOARD ROUTING
+# ==========================================
 
-@current_app.route('/', endpoint='dashboard_overview')
+@current_app.route('/')
 def dashboard_overview():
-    """Primary layout routing tracking current transactional metrics."""
-    return render_template('base.html', active_page='dashboard')
+    """Primary layout routing tracking current transactional KPI metrics."""
+    db_path = current_app.config['DATABASE']
+    kpis = get_dashboard_kpis(db_path)
+    return render_template('dashboard.html', kpis=kpis, active_page='dashboard')
 
-@current_app.route('/vehicles', methods=['GET'], endpoint='list_vehicles')
+# ==========================================
+# PHASE 2: VEHICLES & DRIVERS REGISTRIES
+# ==========================================
+
+@current_app.route('/vehicles', methods=['GET'])
 def list_vehicles():
     """Retrieve all current machine asset configurations registered across storage engines."""
     db_path = current_app.config['DATABASE']
@@ -18,7 +32,7 @@ def list_vehicles():
     conn.close()
     return render_template('vehicles.html', vehicles=vehicles, active_page='vehicles')
 
-@current_app.route('/vehicles/create', methods=['POST'], endpoint='create_vehicle')
+@current_app.route('/vehicles/create', methods=['POST'])
 def create_vehicle():
     """Ingest asset creation parameters, validating item identity uniqueness fields."""
     db_path = current_app.config['DATABASE']
@@ -44,18 +58,18 @@ def create_vehicle():
         
     return redirect(url_for('list_vehicles'))
 
-@current_app.route('/drivers', methods=['GET'], endpoint='list_drivers')
+@current_app.route('/drivers', methods=['GET'])
 def list_drivers():
-    """Deliver complete operational directory containing all operator files and scores[cite: 3]."""
+    """Deliver complete operational directory containing all operator files and scores."""
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
     drivers = conn.execute('SELECT * FROM drivers').fetchall()
     conn.close()
     return render_template('drivers.html', drivers=drivers, active_page='drivers')
 
-@current_app.route('/drivers/create', methods=['POST'], endpoint='create_driver')
+@current_app.route('/drivers/create', methods=['POST'])
 def create_driver():
-    """Ingest explicit driver operational records into localized verification ledgers[cite: 3]."""
+    """Ingest explicit driver operational records into localized verification ledgers."""
     db_path = current_app.config['DATABASE']
     name = request.form['name'].strip()
     license_num = request.form['license_num'].strip().upper()
@@ -79,22 +93,23 @@ def create_driver():
         
     return redirect(url_for('list_drivers'))
 
-from integration import run_dispatch_validation
+# ==========================================
+# PHASE 3: TRIP DISPATCHER ENGINE
+# ==========================================
 
-@current_app.route('/dispatch', methods=['GET'], endpoint='dispatch_dashboard')
+@current_app.route('/dispatch', methods=['GET'])
 def dispatch_dashboard():
     """Deliver configuration form arrays containing only eligible asset elements."""
     db_path = current_app.config['DATABASE']
     conn = get_db_connection(db_path)
     
-    # Structural rule: Fetch only available assets for matching
     vehicles = conn.execute("SELECT * FROM vehicles WHERE status = 'Available'").fetchall()
     drivers = conn.execute("SELECT * FROM drivers WHERE status = 'Available'").fetchall()
     conn.close()
     
     return render_template('dispatcher.html', vehicles=vehicles, drivers=drivers, active_page='dispatch')
 
-@current_app.route('/dispatch/create', methods=['POST'], endpoint='execute_dispatch_transaction')
+@current_app.route('/dispatch/create', methods=['POST'])
 def execute_dispatch_transaction():
     """Process incoming routing transactions through rule integration engines safely."""
     db_path = current_app.config['DATABASE']
@@ -106,7 +121,7 @@ def execute_dispatch_transaction():
     cargo_weight = float(request.form['cargo_weight'])
     planned_distance = float(request.form['planned_distance'])
     
-    # Delegate logic execution down to Arnob's framework 
+    # Delegate logic execution down to Arnob's validation framework middleware
     is_valid, message = run_dispatch_validation(db_path, vehicle_ref, driver_ref, cargo_weight)
     
     if not is_valid:
@@ -115,7 +130,6 @@ def execute_dispatch_transaction():
         
     conn = get_db_connection(db_path)
     try:
-        # Open transaction scope block
         conn.execute('BEGIN TRANSACTION')
         
         # 1. Log deployment entry into trips registry data matrix
@@ -137,8 +151,6 @@ def execute_dispatch_transaction():
         conn.close()
         
     return redirect(url_for('dispatch_dashboard'))
-
-from integration import calculate_vehicle_operational_costs
 
 # ==========================================
 # PHASE 4: MAINTENANCE ROUTING ENDPOINTS
@@ -208,7 +220,7 @@ def close_maintenance_log(log_id):
     return redirect(url_for('maintenance_dashboard'))
 
 # ==========================================
-# PHASE 4: FUEL & EXPENSES ROUTING ENDPOINTS
+# PHASE 4: FUEL & EXPENSES ENDPOINTS
 # ==========================================
 
 @current_app.route('/expenses', methods=['GET'])
@@ -260,3 +272,34 @@ def create_general_expense():
     conn.close()
     flash(f'{expense_type} expense recorded successfully for {vehicle_ref}.', 'success')
     return redirect(url_for('expenses_dashboard'))
+
+# ==========================================
+# PHASE 5: ANALYTICS & CSV REPORTING
+# ==========================================
+
+@current_app.route('/analytics', methods=['GET'])
+def analytics_dashboard():
+    """Render the ROI and Fuel Efficiency metrics matrix."""
+    db_path = current_app.config['DATABASE']
+    analytics = get_analytics_data(db_path)
+    return render_template('analytics.html', analytics=analytics, active_page='analytics')
+
+@current_app.route('/export/csv', methods=['GET'])
+def export_csv():
+    """Dynamically generate and download a CSV file of the Analytics metrics."""
+    db_path = current_app.config['DATABASE']
+    analytics = get_analytics_data(db_path)
+    
+    def generate_csv():
+        # Header row
+        yield 'Registration Number,Fuel Efficiency (KM/L),Total Operational Cost (INR),Vehicle ROI (%)\n'
+        # Data rows
+        for row in analytics:
+            yield f"{row['reg_num']},{row['efficiency']},{row['operational_cost']},{row['roi']}\n"
+            
+    # Return standard CSV headers forcing a browser file download
+    return Response(
+        generate_csv(), 
+        mimetype='text/csv', 
+        headers={'Content-Disposition': 'attachment; filename=transitops_analytics.csv'}
+    )
